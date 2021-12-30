@@ -44,6 +44,7 @@ app.post("/add", async (req, res) => {
 		password: req.body.password,
 		name: req.body.name,
 	});
+	
 	res.json({ message: "User Added" });
 });
 
@@ -63,6 +64,36 @@ app.delete("/delete/:id", async (req, res) => {
 	let docRef = db.collection("user");
 	await docRef.doc(req.params.id).delete();
 	res.json({ message: "User Deleted" });
+});
+
+//signup
+app.post('/signup',async (req,res)=>{
+	await admin.auth().createUser({
+		email: req.body.email,
+		emailVerified: true,
+		password: req.body.password,
+		displayName: req.body.name,
+		disabled: false,
+	});
+	res.json({ message: "User Registered" });
+})
+
+
+//Login user
+app.post("/login", async (req, res) => {
+	try {
+		const user = await admin.auth().getUserByEmail(req.body.email);
+		try {
+			const token = await admin.auth().createCustomToken(req.body.email);
+			res.json({token: token});
+		} catch (e) {
+			console.log(e);
+			res.json({ message: "Error Generating Token!Please try again" });
+		}
+	} catch (e) {
+		console.log(e)
+		res.json({ message: "no user 11 record found" });
+	}
 });
 
 const server = app.listen(4000, () => {
